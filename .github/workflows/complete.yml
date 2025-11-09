@@ -12,7 +12,11 @@ jobs:
     - name: Setup Node.js environment
       uses: actions/setup-node@v6.0.0 
     - name: Archive
-      run: zip -r app-bundle.zip
+      run: |
+        # Remove any previous zip
+        rm -f app-bundle.zip
+        # Zip all files and folders in the repo, including node_modules, excluding .git and the zip itself
+        zip -r app-bundle.zip . -x "*.git*" -x "app-bundle.zip"
     - name: Verification
       run: ls -alhR
     - name: Better Test Reports Action
