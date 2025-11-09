@@ -1,27 +1,46 @@
 name: Build Example
 
 on:
-  workflow_dispatch
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build-example:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v5.0.0
-    - name: Setup Node.js environment
-      uses: actions/setup-node@v6.0.0 
-    - name: Install dependencies
-      run: npm install
-    - name: Archive
-      run: |
-        rm -f app-bundle.zip
-        zip -r app-bundle.zip . -x "*.git*" -x "app-bundle.zip"
-    - name: Run tests
-      run: |
-        mkdir -p coverage
-        npx jest --coverage --ci
-    - name: Better Test Reports Action
-      uses: mridang/action-test-reporter@v1.6.0
-    - name: Verification
-      run: ls -alhR
+      # Step 1: Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'  # adjust as needed
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Bundle code into a zip
+      - name: Bundle code
+        run: zip -r app_bundle.zip . -x "*.git*" -x "node_modules/**" && zip -r app_bundle_with_node_modules.zip node_modules
+
+      # Step 5: Run unit tests (and generate coverage)
+      - name: Run unit tests
+        run: |
+          npm test -- --coverage
+        # Adapt above if you use a different test framework or coverage tool
+
+      # Step 6: Publish test / coverage report using Better Test Reports Action
+      - name: Test / Coverage Summary
+        uses: mridang/action-test-reporter@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          coverage-file: ./coverage/clover.xml   # or ./coverage/lcov.info etc — depending on your tool
+          working-directory: ./
