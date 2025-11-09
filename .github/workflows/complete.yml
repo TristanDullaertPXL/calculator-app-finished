@@ -15,3 +15,7 @@ jobs:
       run: zip -r app-bundle.zip
     - name: Verification
       run: ls -alhR
+    - name: Run tests
+      run: |
+        mkdir -p test-reports
+        npx jest --ci --reporters=default --reporters=jest-junit --outputFile=test-reports/junit.xml
