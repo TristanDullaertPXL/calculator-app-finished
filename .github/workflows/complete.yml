@@ -13,11 +13,13 @@ jobs:
       uses: actions/setup-node@v6.0.0 
     - name: Archive
       run: |
-        # Remove any previous zip
         rm -f app-bundle.zip
-        # Zip all files and folders in the repo, including node_modules, excluding .git and the zip itself
         zip -r app-bundle.zip . -x "*.git*" -x "app-bundle.zip"
-    - name: Verification
-      run: ls -alhR
+    - name: Run tests
+      run: |
+        mkdir -p coverage
+        npx jest --coverage --ci
     - name: Better Test Reports Action
       uses: mridang/action-test-reporter@v1.6.0
+    - name: Verification
+      run: ls -alhR
